@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор возврата страховой премии</title>
+
+<style>
+:root {
+    --blue: #1e4fd8;
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --text: #1f2937;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: Inter, Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.back-wrap {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: #1e4fd8;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: #f1f5ff;
+    transition: all .2s ease;
+}
+
+.back-btn:hover {
+    background: #1e4fd8;
+    color: #fff;
+}
+
+
+.wrapper {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    margin-bottom: 24px;
+}
+
+h1, h2 {
+    text-align: center;
+    color: var(--blue);
+}
+
+label {
+    font-weight: 600;
+    margin-top: 16px;
+    display: block;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    margin-top: 6px;
+}
+
+.result {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--blue);
+    text-align: center;
+    margin-top: 14px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.box {
+    background: #f8fafc;
+    border-left: 5px solid var(--blue);
+    padding: 16px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+
+<div class="wrapper">
+
+<div class="back-wrap">
+    <a href="index.html" class="back-btn">← На главную</a>
+</div>
+
+<h1>Калькулятор возврата страховой премии</h1>
+
+<div class="card">
+    <label>Дата начала договора</label>
+    <input type="date" id="startDate" onchange="calc()">
+
+    <label>Дата окончания договора</label>
+    <input type="date" id="endDate" onchange="calc()">
+
+    <label>Дата расторжения</label>
+    <input type="date" id="cancelDate" onchange="calc()">
+
+    <label>Страховая премия (₸)</label>
+    <input type="number" id="premium" placeholder="Введите сумму" oninput="calc()">
+
+    <label>Административные расходы (%)</label>
+    <input type="number" id="adminPercent" placeholder="Например 10" oninput="calc()">
+</div>
+
+<div class="card">
+    <h2>Результаты расчета</h2>
+
+    <div class="grid">
+        <div class="box" id="totalDays">Срок договора: 0 дней</div>
+        <div class="box" id="usedDays">Использовано дней: 0</div>
+        <div class="box" id="usedPremium">Удержано премии: 0 ₸</div>
+        <div class="box" id="refundPremium">Возврат клиенту: 0 ₸</div>
+        <div class="box" id="adminCost">Административные расходы: 0 ₸</div>
+        <div class="box" id="finalRefund">Итого к возврату: 0 ₸</div>
+    </div>
+</div>
+
+</div>
+
+<script>
+function format(n) {
+    return Math.round(n).toLocaleString('ru-RU') + ' ₸';
+}
+
+
+function daysBetween(a, b) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return Math.max(0, Math.round((b - a) / oneDay));
+}
+
+function calc() {
+    const start = new Date(startDate.value);
+    const end = new Date(endDate.value);
+    const cancel = new Date(cancelDate.value);
+    const premium = Number(document.getElementById('premium').value) || 0;
+    const adminPercent = Number(document.getElementById('adminPercent').value) || 0;
+
+    if (!startDate.value || !endDate.value || !cancelDate.value) return;
+
+    const totalDays = daysBetween(start, end);
+    const usedDays = daysBetween(start, cancel);
+
+    const usedPremium = totalDays > 0 
+        ? premium * (usedDays / totalDays)
+        : 0;
+
+    const refund = premium - usedPremium;
+    const adminCost = refund * (adminPercent / 100);
+    const finalRefund = refund - adminCost;
+
+    document.getElementById('totalDays').textContent = `Срок договора: ${totalDays} дней`;
+    document.getElementById('usedDays').textContent = `Использовано дней: ${usedDays}`;
+    document.getElementById('usedPremium').textContent = `Удержано премии: ${format(usedPremium)}`;
+    document.getElementById('refundPremium').textContent = `Возврат клиенту: ${format(refund)}`;
+    document.getElementById('adminCost').textContent = `Административные расходы: ${format(adminCost)}`;
+    document.getElementById('finalRefund').textContent = `Итого к возврату: ${format(finalRefund)}`;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Калькулятор страхования и окупаемости</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+    --primary:#2563eb;
+    --accent:#0ea5e9;
+    --success:#16a34a;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --text:#1e293b;
+    --muted:#64748b;
+}
+
+*{box-sizing:border-box;font-family:"Segoe UI",system-ui,sans-serif;}
+
+body{
+    margin:0;
+    background:var(--bg);
+    padding:30px;
+    color:var(--text);
+}
+
+.back-wrap {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: #1e4fd8;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: #f1f5ff;
+    transition: all .2s ease;
+}
+
+.back-btn:hover {
+    background: #1e4fd8;
+    color: #fff;
+}
+
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+h1{margin-bottom:6px;}
+.subtitle{color:var(--muted);margin-bottom:30px;}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 12px 28px rgba(0,0,0,.08);
+}
+
+.card h3{
+    margin-top:0;
+    margin-bottom:16px;
+}
+
+label{
+    font-weight:600;
+    font-size:14px;
+    display:block;
+    margin-top:14px;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border-radius:10px;
+    border:1px solid #cbd5f5;
+    font-size:15px;
+}
+
+input:focus,select:focus{
+    outline:none;
+    border-color:var(--primary);
+}
+
+/* ---------- TOGGLE ---------- */
+.toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:18px;
+    padding:12px 14px;
+    border-radius:12px;
+    background:#f8fafc;
+}
+
+.toggle-text{
+    font-weight:600;
+    font-size:14px;
+    color:var(--text);
+}
+
+.switch{
+    position:relative;
+    width:46px;
+    height:26px;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background:#cbd5e1;
+    border-radius:999px;
+    transition:.25s;
+}
+
+.slider:before{
+    content:"";
+    position:absolute;
+    height:20px;
+    width:20px;
+    left:3px;
+    top:3px;
+    background:white;
+    border-radius:50%;
+    transition:.25s;
+}
+
+.switch input:checked + .slider{
+    background:var(--primary);
+}
+
+.switch input:checked + .slider:before{
+    transform:translateX(20px);
+}
+/* ---------- END TOGGLE ---------- */
+
+.results{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+}
+
+.result-box{
+    background:#f8fafc;
+    border-radius:12px;
+    padding:16px;
+    border-left:5px solid var(--accent);
+}
+
+.result-box span{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.result-box strong{
+    display:block;
+    font-size:18px;
+    margin-top:4px;
+}
+
+.highlight{
+    background:#ecfdf5;
+    border-left-color:var(--success);
+}
+
+.payback{
+    font-size:22px;
+    font-weight:700;
+    color:var(--success);
+}
+
+@media(max-width:900px){
+    .grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="back-wrap">
+    <a href="index.html" class="back-btn">← На главную</a>
+</div>
+
+
+    <h1>Калькулятор страхования и депозита</h1>
+    <div class="subtitle">
+        Расчёт страховой премии и окупаемости за счёт депозита (юр. лица)
+    </div>
+
+    <div class="grid">
+
+        <!-- ВВОД -->
+        <div class="card">
+            <h3>Параметры договора</h3>
+
+            <label>Сумма договора (₸)</label>
+            <input type="number" id="contract" value="">
+
+            <div class="toggle-row">
+                <div class="toggle-text">Используется аванс 30%</div>
+                <label class="switch">
+                    <input type="checkbox" id="useAdvance" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <label>Тариф для 3% обеспечения</label>
+            <select id="rate3">
+                <option value="0.02">2% (1 год)</option>
+                <option value="0.025">2.5% (1 год)</option>
+                <option value="0.03">3% (1 год)</option>
+                <option value="0.04">4% (2 года)</option>
+                <option value="0.05">5% (2 года)</option>
+                <option value="0.06">6% (2 года)</option>
+            </select>
+
+            <label id="rate30Label">Тариф для 30% аванса</label>
+            <select id="rate30">
+                <option value="0.02">2% (1 год)</option>
+                <option value="0.025">2.5% (1 год)</option>
+                <option value="0.03">3% (1 год)</option>
+                <option value="0.04">4% (2 года)</option>
+                <option value="0.05">5% (2 года)</option>
+                <option value="0.06">6% (2 года)</option>
+            </select>
+
+            <label>Банк (депозит для юр. лиц)</label>
+            <select id="bank">
+                <option value="0.14">Халык Банк — ГЭСВ 14%</option>
+                <option value="0.155">БЦК — ГЭСВ 15.5%</option>
+                <option value="0.1773">Форте Банк — 17.73%</option>
+                <option value="0.086">Береке Банк — 8.6%</option>
+                <option value="0.125">РБК — 12.5%</option>
+                <option value="0.163">Фридом Банк — 16.3%</option>
+                <option value="0.115">Алатау Сити Банк — 11.5%</option>
+            </select>
+        </div>
+
+        <!-- РЕЗУЛЬТАТ -->
+        <div class="card">
+            <h3>Результаты</h3>
+            <div class="results" id="result"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function formatNumber(num){
+    return num.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calc(){
+    const contract = +document.getElementById('contract').value;
+    const rate3 = +document.getElementById('rate3').value;
+    const rate30 = +document.getElementById('rate30').value;
+    const bankRate = +document.getElementById('bank').value;
+    const useAdvance = document.getElementById('useAdvance').checked;
+
+    const sum3 = contract * 0.03;
+    const sum30 = useAdvance ? contract * 0.30 : 0;
+
+    const prem3 = sum3 * rate3;
+    const prem30 = useAdvance ? sum30 * rate30 : 0;
+
+    const totalPremium = prem3 + prem30;
+    const deposit = (sum3 + sum30) - totalPremium;
+
+    const monthlyIncome = (deposit * bankRate) / 12;
+    const months = monthlyIncome > 0 ? totalPremium / monthlyIncome : 0;
+    const days = months * 30;
+
+    document.getElementById('rate30').style.display = useAdvance ? 'block' : 'none';
+    document.getElementById('rate30Label').style.display = useAdvance ? 'block' : 'none';
+
+    document.getElementById('result').innerHTML = `
+        <div class="result-box">
+            <span>3% обеспечение</span>
+            <strong>${formatNumber(sum3)} ₸</strong>
+        </div>
+
+        ${useAdvance ? `
+        <div class="result-box">
+            <span>30% аванс</span>
+            <strong>${formatNumber(sum30)} ₸</strong>
+        </div>` : ``}
+
+        <div class="result-box">
+            <span>Общая страховая премия</span>
+            <strong>${formatNumber(totalPremium)} ₸</strong>
+        </div>
+
+        <div class="result-box">
+            <span>Сумма депозита</span>
+            <strong>${formatNumber(deposit)} ₸</strong>
+        </div>
+
+        <div class="result-box">
+            <span>Доход депозита в месяц</span>
+            <strong>${formatNumber(monthlyIncome)} ₸</strong>
+        </div>
+
+        <div class="result-box highlight">
+            <span>Окупаемость страховки</span>
+            <strong class="payback">${formatNumber(months)} мес (~${formatNumber(days)} дн)</strong>
+        </div>
+    `;
+}
+
+document.querySelectorAll('input, select').forEach(el=>{
+    el.addEventListener('input',calc);
+});
+
+calc();
+</script>
+
+</body>
+</html>

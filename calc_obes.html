@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор обеспечения</title>
+
+<style>
+:root {
+    --primary:#2563eb;
+    --accent:#0ea5e9;
+    --success:#16a34a;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --text:#1e293b;
+    --muted:#64748b;
+}
+
+*{box-sizing:border-box;font-family:"Segoe UI",system-ui,sans-serif;}
+
+body{
+    margin:0;
+    background:var(--bg);
+    padding:30px;
+    color:var(--text);
+}
+
+.back-wrap {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: #1e4fd8;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: #f1f5ff;
+    transition: all .2s ease;
+}
+
+.back-btn:hover {
+    background: #1e4fd8;
+    color: #fff;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+h1{margin-bottom:6px;}
+.subtitle{color:var(--muted);margin-bottom:30px;}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 12px 28px rgba(0,0,0,.08);
+}
+
+label{
+    font-weight:600;
+    font-size:14px;
+    display:block;
+    margin-top:14px;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border-radius:10px;
+    border:1px solid #cbd5f5;
+    font-size:15px;
+}
+
+input:focus,select:focus{
+    outline:none;
+    border-color:var(--primary);
+}
+
+.results{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-top:20px;
+}
+
+.result-box{
+    background:#f8fafc;
+    border-radius:12px;
+    padding:16px;
+    border-left:5px solid var(--accent);
+}
+
+.result-box span{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.result-box strong{
+    display:block;
+    font-size:18px;
+    margin-top:4px;
+}
+
+.highlight{
+    background:#ecfdf5;
+    border-left-color:var(--success);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:16px;
+}
+
+th,td{
+    border:1px solid #e2e8f0;
+    padding:10px;
+    text-align:center;
+    font-size:14px;
+}
+
+th{
+    background:#2563eb;
+    color:#fff;
+}
+
+@media(max-width:900px){
+    .grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+
+
+
+<div class="container">
+<div class="back-wrap">
+    <a href="index.html" class="back-btn">← На главную</a>
+</div>
+    <h1>Калькулятор обеспечения</h1>
+    <div class="subtitle">Расчёт страховой премии и экономии клиента</div>
+
+    <div class="grid">
+
+        <!-- ВВОД -->
+        <div class="card">
+            <label>Сумма лота</label>
+            <input type="number" id="lotAmount" oninput="calculate()">
+
+            <label>Обеспечение (%)</label>
+            <select id="securityRate" onchange="calculate()">
+                <option value="1">1%</option>
+                <option value="3">3%</option>
+                <option value="5">5%</option>
+            </select>
+
+            <label>Срок страхования</label>
+            <select id="insuranceYears" onchange="calculate()">
+                <option value="">— Выберите срок —</option>
+                <option value="1">1 год</option>
+                <option value="2">2 года</option>
+                <option value="3">3 года</option>
+            </select>
+
+            <div class="results">
+                <div class="result-box highlight">
+                    <span>Сумма обеспечения</span>
+                    <strong id="securityResult">0.00 тенге</strong>
+                </div>
+                <div class="result-box">
+                    <span>Аванс 30%</span>
+                    <strong id="advanceResult">0.00 тенге</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- РЕЗУЛЬТАТ -->
+        <div class="card">
+            <h3>Страховая премия</h3>
+            <div id="tariffContainer" class="results"></div>
+
+            <h3 style="margin-top:24px;">Экономия клиента</h3>
+            <table id="savingTable" style="display:none;"></table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function formatInt(num){
+    return Math.round(num).toLocaleString('ru-RU') + ' тенге';
+}
+
+function format2(num){
+    return num.toLocaleString('ru-RU', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + ' тенге';
+}
+
+function calculate(){
+    let lot = parseFloat(document.getElementById('lotAmount').value) || 0;
+    let rate = parseFloat(document.getElementById('securityRate').value) || 0;
+    let years = document.getElementById('insuranceYears').value;
+
+    let security = lot * (rate / 100);
+    let advance = lot * 0.3;
+
+    document.getElementById('securityResult').textContent = format2(security);
+    document.getElementById('advanceResult').textContent = format2(advance);
+
+    if(!years) return;
+
+    const tariffsByYears = {
+        1: [0.02, 0.025, 0.03, 0.035],
+        2: [0.04, 0.05, 0.06, 0.07],
+        3: [0.06, 0.075, 0.09, 0.105]
+    };
+
+    let tariffs = tariffsByYears[years];
+    let tariffContainer = document.getElementById('tariffContainer');
+    let savingTable = document.getElementById('savingTable');
+
+    tariffContainer.innerHTML = '';
+    savingTable.style.display = 'table';
+    savingTable.innerHTML = `
+        <tr>
+            <th>Тариф</th>
+            <th>Экономия по обеспечению</th>
+            <th>Экономия по авансу</th>
+        </tr>
+    `;
+
+    tariffs.forEach(t => {
+        let percent = (t * 100).toFixed(1);
+
+        let premSec = security * t;
+        let premAdv = advance * t;
+
+        tariffContainer.innerHTML += `
+            <div class="result-box">
+                <span>Тариф ${percent}%</span>
+                <strong>${formatInt(premSec)}</strong>
+                <span>Аванс: ${formatInt(premAdv)}</span>
+            </div>
+        `;
+
+        savingTable.innerHTML += `
+            <tr>
+                <td>${percent}%</td>
+                <td>${formatInt(security - premSec)}</td>
+                <td>${formatInt(advance - premAdv)}</td>
+            </tr>
+        `;
+    });
+}
+</script>
+
+</body>
+</html>
