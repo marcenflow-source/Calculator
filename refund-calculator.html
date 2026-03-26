@@ -168,7 +168,9 @@ function calc() {
     if (!startDate.value || !endDate.value || !cancelDate.value) return;
 
     const totalDays = daysBetween(start, end);
-    const usedDays = daysBetween(start, cancel);
+    const usedDays = cancel >= start 
+    ? daysBetween(start, cancel) + 1 
+    : 0;
 
     const usedPremium = totalDays > 0 
         ? premium * (usedDays / totalDays)
